@@ -1,0 +1,420 @@
+ <html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.14/p5.js"></script>  
+  </head>
+	<body>
+		<SCRIPT LANGUAGE="JavaScript"> 
+		
+		//variables
+		var backgroundColorR 
+		var backgroundColorG 		
+		var backgroundColorB 
+		var leftPaddleY
+		var rightPaddleY
+		var ballX
+		var ballY
+		var gameStart
+		var ballXStart
+		var ballYStart
+		var player1Score
+		var player2Score
+		var gameDone
+		var playAI
+		var AIPositions
+		var readInstructions
+		
+		function setup(){
+				
+			//declare variables
+			backgroundColorR = random(255)
+			backgroundColorG = random(255)
+			backgroundColorB = random(255)
+			leftPaddleY = 260
+			rightPaddleY = 260
+			ballX = 630
+			ballY = 360
+			ballXMovement = random(100)
+			ballYMovement = random(100)
+			gameStart = 0
+			player1Score = 0
+			player2Score = 0
+			gameDone = 0
+			playAI = 0
+			AIPositions = [30,260,480]
+			readInstructions = 0
+			
+			//canvas size
+			createCanvas(1260,720)
+			
+			
+		}
+
+		function draw(){
+				
+			//call functions
+			background(backgroundColorR,backgroundColorG,backgroundColorB)
+			board()
+			paddleAndBall()
+			ballPhysics()
+			keyPressed()
+			keyTyped()
+			scoreboard()
+			gameEnd()
+			AIPhysics()
+			instructions()
+		}
+	
+		function instructions(){
+			
+			//create instructions button
+			fill(backgroundColorR,backgroundColorG,backgroundColorB)
+			stroke(255)
+			strokeWeight(3)
+			rect(580,670,100,50)
+			textFont('rockwell',15)
+			text("Instructions",590,700)
+
+			//if button is pressed display intructions
+			if(readInstructions == 1){
+				
+				fill(backgroundColorR,backgroundColorG,backgroundColorB)
+				stroke(0)
+				strokeWeight(3)
+				rect(0,0,1260,720)
+				fill(255)
+				textFont('rockwell',50)
+				text("INSTRUCTIONS",480,80)
+				textFont('rockwell',25)
+				text("The left paddle is controlled with 'w' and 's' to move up and down respectively",200,150)
+				text("The right paddle is controlled with the up and down arrow keys to move",240,200)
+				text("Don't let the ball pass your paddle! The first to 7 points wins!",300,250)
+				text("Click anywhere to begin the game!", 440,300)
+
+			}
+		
+		}
+
+
+		function board(){
+		
+			//board design	
+			noFill()
+			stroke(255)
+			strokeWeight(3)
+			line(width/2,0,width/2,height)
+			arc(width/2,height/2,300,300,radians(90),radians(270))
+			arc(width/2,height/2,300,300,radians(270),radians(90))
+		
+		}
+ 
+		function paddleAndBall(){
+			
+			//draw paddles and ball
+			fill(255)
+			noStroke()
+			rect(10,leftPaddleY,20,200)
+			rect(1230,rightPaddleY,20,200)
+			ellipse(ballX,ballY,40,40)
+		
+		}
+ 
+ 
+		function keyPressed(){
+				
+				//move right paddle
+				if(keyIsDown(UP_ARROW) && rightPaddleY > 0){
+					
+					rightPaddleY -= 20
+				
+				}
+				
+				else if(keyIsDown(DOWN_ARROW) && rightPaddleY + 200 < height){
+					
+					rightPaddleY += 20
+			
+				}				
+			
+			//activate AI mode
+			if(keyCode == (ENTER) && player1Score == 0 && player2Score == 0){
+			
+				playAI = 1
+			
+			}
+	
+			else if(keyCode == (BACKSPACE) && player1Score == 0 && player2Score == 0){
+
+				playAI = 0
+
+			}
+
+		
+		}
+
+		function keyTyped(){
+			
+			//move left paddle
+			if(key == "w" && leftPaddleY > 0){
+					
+				if(keyIsPressed == true){
+						
+					leftPaddleY -= 20
+				
+				}
+				
+			}
+							
+			else if(key == "s" && leftPaddleY + 200 < height){
+					
+				if(keyIsPressed == true){
+						
+					leftPaddleY += 20
+			
+				}
+				
+			}
+			
+		}
+			
+		function ballPhysics(){
+			
+			//start game
+			if(gameStart == 1){
+					
+				if(ballXMovement >= 50){
+					
+					ballX += 20
+					
+				}
+					
+				else if(ballXMovement < 50){
+					
+					ballX -= 20
+					
+				}
+				
+				if(ballYMovement >= 50){
+					
+					ballY += 20
+					
+				}
+					
+				else if(ballYMovement < 50){
+					
+					ballY -= 20
+					
+				}
+				
+			}
+				
+			//bounce off walls and paddles
+			if(ballX + 20 >= 1230 && ballX + 20 <= 1250){
+					
+				if(ballY <= rightPaddleY + 200 && ballY >= rightPaddleY){
+					
+					ballXMovement = 40
+						
+				}
+				
+			}
+			
+			else if(ballX - 20 <= 30 && ballX + 20 >= 10){
+				
+				if(ballY <= leftPaddleY + 200 && ballY >= leftPaddleY){
+				
+					ballXMovement = 60
+				
+				}
+					
+			}
+			
+			else if(ballY - 20 <= 0){
+				
+				ballYMovement = 60
+				
+			}
+			
+			else if(ballY + 20 >= 720){
+				
+				ballYMovement = 40
+					
+				
+			}
+			
+		}
+ 
+		function AIPhysics(){
+		
+			//if AI mode display the indicator
+			if(playAI == 1 && player1Score == 0 && player2Score == 0){
+				
+				textFont('rockwell',25)
+				text("AI Mode",1150,40)
+				text("Press Backspace to Return to 2 Player Mode!", 700, 710)
+			
+			}	
+			
+			if(playAI == 1){
+			
+				//detect ball position and move paddle accordingly
+				if(ballY <= 144){
+					
+					while(rightPaddleY != AIPositions[0]){
+					
+						rightPaddleY -= 1
+					
+					}
+				
+				}				
+				
+				else if(ballY > 144 && ballY <= 432){
+				
+					while(rightPaddleY != AIPositions[1]){
+					
+						if(rightPaddleY < AIPositions[1]){
+						
+							rightPaddleY += 1
+						
+						}
+					
+						else if(rightPaddleY > AIPositions[1]){
+						
+							rightPaddleY -= 1
+						
+						}
+						
+					}
+				
+				}		
+				
+				else if(ballY > 432 && ballY <= 720){
+				
+					while(rightPaddleY != AIPositions[2]){
+					
+						rightPaddleY += 1
+				
+					}
+					
+				}										
+		
+			}
+		
+			//display text on how to start AI mode
+			else if(playAI == 0 && player1Score == 0 && player2Score == 0){
+
+				textFont('rockwell',25)
+				text("Press Enter To Start AI Mode!",40,710)
+
+			}
+
+		}
+		
+		
+		function mousePressed(){
+			
+			//detect if instructions button is pressed
+			if(mouseX >= 580 && mouseX <=680 && mouseY >= 670 && mouseY <= 720){
+
+				readInstructions = 1
+
+			}
+			
+			//start the game
+			else{
+				
+				readInstructions = 0
+				gameStart = 1
+
+			}
+			
+			//reset scores after each round
+			if(gameRestart == 1){
+				
+				gameDone = 0
+				gameRestart = 0
+				player1Score = 0
+				player2Score = 0
+				
+			}	
+		
+		}
+
+		function scoreboard(){
+			
+			//add score for the left player
+			while(ballX >= 1260){
+				
+				for(var i = 0; i < 1; i++){
+				
+					gameStart = 0
+					ballX = width/2
+					ballY = height/2
+					player1Score += 1
+				}
+			
+			}
+			
+			//add score for the right player
+			while(ballX <= 0){
+				
+				for(var t = 0; t < 1; t++){
+				
+					gameStart = 0
+					ballX = width/2
+					ballY = height/2
+					player2Score += 1
+				
+				}
+			
+			}
+			
+			//display both players scores
+			fill(255)
+			stroke(0)
+			textFont('rockwell',50)
+			text(player1Score,570,50)
+			text(player2Score,660,50)
+			
+			//text on how to start each game
+			if(gameStart == 0 && gameDone != 1){
+			
+				textFont('rockwell',50)
+				text("Click To Play!",470,370)
+				
+			}
+			
+			//text on how to start a new match
+			if(gameDone == 1){
+					
+				textFont('rockwell',50)
+				text("Click To Play Again!",400,370)
+				gameRestart = 1
+					
+			}	
+  
+		}
+		function gameEnd(){
+			
+			//detect when a player wins
+			if(player1Score == 7){
+				
+				text("Player 1 Wins!",100,50)
+				gameDone = 1
+			
+			}
+				
+			else if(player2Score == 7){
+				
+				text("Player 2 Wins!",800,50)
+				gameDone = 1
+				
+			}
+			
+		}
+  
+  
+		</SCRIPT>
+	</body>
+</html>
+
+
+
